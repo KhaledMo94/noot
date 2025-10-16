@@ -1,0 +1,37 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Contracts\Permission;
+use Spatie\Permission\Models\Permission as ModelsPermission;
+use Spatie\Permission\Models\Role;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $this->call(RolesSeeder::class);
+
+        $user = User::create([
+            'name'                      =>'Super Admin',
+            'email'                     =>'admin@note.com',
+            'password'                  =>Hash::make('9449'),
+            'phone_number'              =>'1111111111',
+            'phone_verified_at'         =>now(),
+        ]);
+
+        $user->assignRole('super-admin');
+
+        $this->call(PermissionsSeeder::class);
+
+        $super_admin_role = Role::findByName('super-admin');
+        $super_admin_role->syncPermissions(ModelsPermission::where('name','<>','provider.moderator')->pluck('id')->toArray());
+    }
+}
