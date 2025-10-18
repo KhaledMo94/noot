@@ -33,6 +33,7 @@ class ServiceProvider extends Model
 
     protected $appends = [
         'in-free-trail',
+        'image_url'
     ];
 
     public function category()
@@ -48,6 +49,11 @@ class ServiceProvider extends Model
     public function getInFreeTrailAttribute() :bool
     {
         return $this->free_trail_start_date <= now() && $this->free_trail_end_date >= now();
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
 }

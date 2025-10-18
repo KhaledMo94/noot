@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Traits\ActivityScopeTrait;
+use App\Traits\HasImageAttributeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable, HasApiTokens, ActivityScopeTrait;
+    use HasFactory, HasRoles, Notifiable, HasApiTokens, ActivityScopeTrait , HasImageAttributeTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -28,16 +29,17 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'national_id',
+        'status',
         'phone_number',
         'country_code',
         'phone_verified_at',
         'image',
-        'status',
         'fcm_token',
         'player_id',
         'qr_code',
         'otp_code',
         'otp_expires_at',
+        'cashier_id',
     ];
 
     /**
@@ -68,7 +70,6 @@ class User extends Authenticatable
     //-----------------------------
 
     protected $appends = [
-        'type',
         'image_url',
         'is_phone_verified',
         'phone',
@@ -107,6 +108,16 @@ class User extends Authenticatable
     public function ownedServiceProvider()
     {
         return $this->hasOne(ServiceProvider::class , 'moderator_id');
+    }
+
+    public function userOrders()
+    {
+        return $this->hasMany(Order::class , 'user_id');
+    }
+
+    public function cashierOrders()
+    {
+        return $this->hasMany(Order::class , 'cashier_id');
     }
 
 }

@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->json('name');
             $table->json('description')->nullable();
-            $table->integer('before_price')->nullable();
-            $table->integer('after_price');
+            $table->float('before_price',8,2)->nullable();
+            $table->float('after_price',8,2);
             $table->string('image')->nullable();
             $table->foreignId('service_provider_id')->constrained('service_providers','id')->cascadeOnDelete();
+            $table->foreignId('product_category_id')->nullable()->constrained('product_categories','id')->nullOnDelete();
             $table->timestamps();
         });
     }
