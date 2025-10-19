@@ -15,11 +15,14 @@ class PermissionsSeeder extends Seeder
     {
         $array = [
             'categories',
-            'providers',
+            'product-categories',
+            'packages',
+            'service-providers',
             'users',
             'cashiers',
             'notifications',
-            'provider.moderator'
+            'orders',
+            'products',
         ];
 
         foreach ($array as $permission){

@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('cashier_id')->nullable()->constrained('service_providers','id')
-                ->cascadeOnDelete();
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('setting_key')->unique();
+            $table->text('setting_value')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -22,10 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn([
-                'cashier_id',
-            ]);
-        });
+        Schema::dropIfExists('settings');
     }
 };

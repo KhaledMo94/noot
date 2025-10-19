@@ -19,14 +19,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $data = null;
+        // $user = Auth::user();
+        // $data = null;
 
-        if ($user->hasAnyRole(['admin', 'super-admin'])) {
-            $data = $this->getAdminDashboard();
-        } else if($user->hasAnyRole(['provider_moderator'])) {
-            $data = $this->getServiceProviderDashboard();
-        }
+        // if ($user->hasAnyRole(['admin', 'super-admin'])) {
+        //     $data = $this->getAdminDashboard();
+        // } else if($user->hasAnyRole(['provider_moderator'])) {
+        //     $data = $this->getServiceProviderDashboard();
+        // }
         // $users_count = User::whereDoesntHave('roles')->count();
         // $male_count = User::whereDoesntHave('roles')->where('sex', 'm')->count();
         // $female_count = User::whereDoesntHave('roles')->where('sex', 'f')->count();
@@ -70,7 +70,7 @@ class DashboardController extends Controller
         //     $othersOrdersCount[] = $otherOrders[$i] ?? 0;
         // }
 
-        return view('admin.dashboard', compact('data'));
+        return view('admin.dashboard');
 //        return view('admin.dashboard',
         //  compact(
         //     'users_count',
@@ -98,133 +98,133 @@ class DashboardController extends Controller
 //    );
     }
 
-    public function getAdminDashboard()
-    {
-        $data = [];
+    // public function getAdminDashboard()
+    // {
+    //     $data = [];
 
-        $data['users'] = User::withoutRole('super-admin')->get()->count();
-        $data['cashiers'] = User::role('cashier')->get()->count();
-        $data['service_providers'] = ServiceProvider::all()->count();
-        $data['packages'] = Package::active()->get()->count();
-        $data['categories'] = Category::all()->count();
+    //     $data['users'] = User::withoutRole('super-admin')->get()->count();
+    //     $data['cashiers'] = User::role('cashier')->get()->count();
+    //     $data['service_providers'] = ServiceProvider::all()->count();
+    //     $data['packages'] = Package::active()->get()->count();
+    //     $data['categories'] = Category::all()->count();
 
-        $data['active_subscriptions'] = DB::table('package_service_provider')
-            ->where('status', 'subscribed')
-            ->where('end_subscription_date', '>=', now())
-            ->count();
+    //     $data['active_subscriptions'] = DB::table('package_service_provider')
+    //         ->where('status', 'subscribed')
+    //         ->where('end_subscription_date', '>=', now())
+    //         ->count();
 
-        $data['latest_subscriptions'] = PackageSubscription::with([
-            'serviceProvider:id,name',
-            'package:id,name'
-        ])
-            ->orderBy('start_subscription_date', 'desc')
-            ->limit(5)
-            ->get()
-            ->map(function ($subscription) {
-                return [
-                    'provider_name' => $subscription->serviceProvider?->getTranslation('name', app()->getLocale()),
-                    'package_name' => $subscription->package?->getTranslation('name', app()->getLocale()),
-                    'start_subscription_date' => Carbon::parse($subscription->start_subscription_date)->format('Y-m-d'),
-                    'end_subscription_date' => Carbon::parse($subscription->end_subscription_date)->format('Y-m-d'),
-                    'status' => $subscription->status,
-                ];
-            });
-
-
-        $data['subscription_status_chart'] = [
-            'labels' => ['Subscribed', 'Expired', 'Cancelled'],
-            'values' => [
-                PackageSubscription::where('status', 'subscribed')->count(),
-                PackageSubscription::where('status', 'expired')->count(),
-                PackageSubscription::where('status', 'cancelled')->count(),
-            ],
-        ];
-
-        $data['monthly_subscriptions_chart'] = [
-            'labels' => collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('M Y'))->toArray(),
-            'values' => collect(range(5, 0))->map(fn($i) =>
-            PackageSubscription::whereMonth('start_subscription_date', now()->subMonths($i)->month)
-                ->whereYear('start_subscription_date', now()->subMonths($i)->year)
-                ->count()
-            )->toArray(),
-        ];
-
-        $data['top_packages_chart'] = PackageSubscription::select('package_id', DB::raw('count(*) as total'))
-            ->where('status', 'subscribed')
-            ->groupBy('package_id')
-            ->with('package:id,name')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get()
-            ->map(fn($item) => [
-                'name' => $item->package?->getTranslation('name', app()->getLocale()),
-                'count' => $item->total,
-            ]);
-
-        return $data;
-    }
+    //     $data['latest_subscriptions'] = PackageSubscription::with([
+    //         'serviceProvider:id,name',
+    //         'package:id,name'
+    //     ])
+    //         ->orderBy('start_subscription_date', 'desc')
+    //         ->limit(5)
+    //         ->get()
+    //         ->map(function ($subscription) {
+    //             return [
+    //                 'provider_name' => $subscription->serviceProvider?->getTranslation('name', app()->getLocale()),
+    //                 'package_name' => $subscription->package?->getTranslation('name', app()->getLocale()),
+    //                 'start_subscription_date' => Carbon::parse($subscription->start_subscription_date)->format('Y-m-d'),
+    //                 'end_subscription_date' => Carbon::parse($subscription->end_subscription_date)->format('Y-m-d'),
+    //                 'status' => $subscription->status,
+    //             ];
+    //         });
 
 
-    public function getServiceProviderDashboard()
-    {
-        $data = [];
+    //     $data['subscription_status_chart'] = [
+    //         'labels' => ['Subscribed', 'Expired', 'Cancelled'],
+    //         'values' => [
+    //             PackageSubscription::where('status', 'subscribed')->count(),
+    //             PackageSubscription::where('status', 'expired')->count(),
+    //             PackageSubscription::where('status', 'cancelled')->count(),
+    //         ],
+    //     ];
 
-        $data['provider'] = ServiceProvider::findOrFail(Auth::user()->service_provider_id);
+    //     $data['monthly_subscriptions_chart'] = [
+    //         'labels' => collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('M Y'))->toArray(),
+    //         'values' => collect(range(5, 0))->map(fn($i) =>
+    //         PackageSubscription::whereMonth('start_subscription_date', now()->subMonths($i)->month)
+    //             ->whereYear('start_subscription_date', now()->subMonths($i)->year)
+    //             ->count()
+    //         )->toArray(),
+    //     ];
 
-        $data['subscriptions'] = PackageSubscription::with('package')
-            ->where('service_provider_id', Auth::user()->service_provider_id)
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(function ($subscription) {
-                return [
-                    'package_name' => $subscription->package?->getTranslation('name', app()->getLocale()),
-                    'start_subscription_date' => Carbon::parse($subscription->start_subscription_date)->format('Y-m-d'),
-                    'end_subscription_date' => Carbon::parse($subscription->end_subscription_date)->format('Y-m-d'),
-                    'status' => ucfirst($subscription->status),
-                    'is_active' => $subscription->status === 'subscribed'
-                        && Carbon::parse($subscription->end_subscription_date)->isFuture(),
-                    'days_left' => Carbon::now()->diffInDays(Carbon::parse($subscription->end_subscription_date), false),
-                ];
-            });
+    //     $data['top_packages_chart'] = PackageSubscription::select('package_id', DB::raw('count(*) as total'))
+    //         ->where('status', 'subscribed')
+    //         ->groupBy('package_id')
+    //         ->with('package:id,name')
+    //         ->orderByDesc('total')
+    //         ->limit(5)
+    //         ->get()
+    //         ->map(fn($item) => [
+    //             'name' => $item->package?->getTranslation('name', app()->getLocale()),
+    //             'count' => $item->total,
+    //         ]);
 
-
-        $data['latest_orders'] = collect([
-            [
-                'order_number' => 'ORD-20251001',
-                'package_name' => 'Premium Plan',
-                'total_amount' => 199.99,
-                'payment_status' => 'Paid',
-                'order_date' => '2025-10-01',
-            ],
-            [
-                'order_number' => 'ORD-20250921',
-                'package_name' => 'Basic Plan',
-                'total_amount' => 99.50,
-                'payment_status' => 'Pending',
-                'order_date' => '2025-09-21',
-            ],
-            [
-                'order_number' => 'ORD-20250910',
-                'package_name' => 'Trial Package',
-                'total_amount' => 0.00,
-                'payment_status' => 'Free',
-                'order_date' => '2025-09-10',
-            ],
-        ]);
+    //     return $data;
+    // }
 
 
+    // public function getServiceProviderDashboard()
+    // {
+    //     $data = [];
 
-        return $data;
-    }
+    //     $data['provider'] = ServiceProvider::findOrFail(Auth::user()->service_provider_id);
 
-    public function getCashierDashboard()
-    {
+    //     $data['subscriptions'] = PackageSubscription::with('package')
+    //         ->where('service_provider_id', Auth::user()->service_provider_id)
+    //         ->latest()
+    //         ->limit(10)
+    //         ->get()
+    //         ->map(function ($subscription) {
+    //             return [
+    //                 'package_name' => $subscription->package?->getTranslation('name', app()->getLocale()),
+    //                 'start_subscription_date' => Carbon::parse($subscription->start_subscription_date)->format('Y-m-d'),
+    //                 'end_subscription_date' => Carbon::parse($subscription->end_subscription_date)->format('Y-m-d'),
+    //                 'status' => ucfirst($subscription->status),
+    //                 'is_active' => $subscription->status === 'subscribed'
+    //                     && Carbon::parse($subscription->end_subscription_date)->isFuture(),
+    //                 'days_left' => Carbon::now()->diffInDays(Carbon::parse($subscription->end_subscription_date), false),
+    //             ];
+    //         });
 
-    }
 
-    public function getUserDashboard()
-    {
+    //     $data['latest_orders'] = collect([
+    //         [
+    //             'order_number' => 'ORD-20251001',
+    //             'package_name' => 'Premium Plan',
+    //             'total_amount' => 199.99,
+    //             'payment_status' => 'Paid',
+    //             'order_date' => '2025-10-01',
+    //         ],
+    //         [
+    //             'order_number' => 'ORD-20250921',
+    //             'package_name' => 'Basic Plan',
+    //             'total_amount' => 99.50,
+    //             'payment_status' => 'Pending',
+    //             'order_date' => '2025-09-21',
+    //         ],
+    //         [
+    //             'order_number' => 'ORD-20250910',
+    //             'package_name' => 'Trial Package',
+    //             'total_amount' => 0.00,
+    //             'payment_status' => 'Free',
+    //             'order_date' => '2025-09-10',
+    //         ],
+    //     ]);
 
-    }
+
+
+    //     return $data;
+    // }
+
+    // public function getCashierDashboard()
+    // {
+
+    // }
+
+    // public function getUserDashboard()
+    // {
+
+    // }
 }

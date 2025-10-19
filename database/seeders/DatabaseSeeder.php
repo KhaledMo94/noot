@@ -22,7 +22,9 @@ class DatabaseSeeder extends Seeder
         $user = User::create([
             'name'                      =>'Super Admin',
             'email'                     =>'admin@note.com',
-            'password'                  =>Hash::make('9449'),
+            'email_verified_at'         =>now(),
+            'password'                  =>Hash::make('12345678'),
+            'country_code'              =>'+20',
             'phone_number'              =>'1111111111',
             'phone_verified_at'         =>now(),
         ]);
@@ -31,7 +33,5 @@ class DatabaseSeeder extends Seeder
 
         $this->call(PermissionsSeeder::class);
 
-        $super_admin_role = Role::findByName('super-admin');
-        $super_admin_role->syncPermissions(ModelsPermission::where('name','<>','provider.moderator')->pluck('id')->toArray());
     }
 }

@@ -1,15 +1,20 @@
+@inject('setting', '\App\Repositories\GeneralSettingRepository')
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
+
 @php
     $rev_locale = app()->getLocale() == 'en' ? 'ar' : 'en';
+    $title = app()->getLocale() == 'en' ? $setting->settings['site_name_en'] : $setting->settings['site_name_ar'];
+    $settings = $setting->settings;
+    // @dd($settings)
 @endphp
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/png" href="{{ asset('app/maak-logo.png') }}">
-    <title>{{ __('Admin Panel') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('storage/'.$setting->settings['favicon']) }}">
+    <title>{{ $title ??  __('Admin Panel') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.3/tiny-slider.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.3/tiny-slider.js"></script>
